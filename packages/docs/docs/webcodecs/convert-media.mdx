@@ -124,6 +124,8 @@ The video codec to convert to. Currently, `"h264"`, `"h265"`, `"vp8"` and `"vp9"
 The default is defined by [`getDefaultVideoCodec()`](/docs/webcodecs/get-default-video-codec).  
 If a [`onVideoTrack`](#onvideotrack) handler is provided, it will override this setting.
 
+For `"h265"`, the encoder tries multiple compatible codec strings (for example `hvc1` or `hev1`) to maximize browser support.
+
 ### `audioCodec?`
 
 _string_ <TsType type="ConvertMediaAudioCodec" source="@remotion/webcodecs"/>
@@ -268,6 +270,8 @@ import {bufferWriter} from '@remotion/webcodecs/buffer';
 ```
 
 Write to a resizable Array Buffer.
+
+The buffer writer is limited to 2GB. Use `webFsWriter` or a custom writer for larger outputs.
 
 ```tsx twoslash title="Web File System writer"
 import {canUseWebFsWriter, webFsWriter} from '@remotion/webcodecs/web-fs';
