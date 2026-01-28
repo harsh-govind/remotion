@@ -32,8 +32,7 @@ export const getCodecStringsForEncoder = ({
 	}
 
 	if (codec === 'h265') {
-		const preferHighTier =
-			width * height >= 3840 * 2160 || (fps ?? 60) >= 120;
+		const preferHighTier = width * height >= 3840 * 2160 || (fps ?? 60) >= 120;
 		const candidates = [
 			chooseCorrectHevcProfile({fps, height, width, preferHighTier}),
 			chooseCorrectHevcProfile({
