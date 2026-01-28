@@ -4,12 +4,18 @@ export const chooseCorrectHevcProfile = ({
 	width,
 	height,
 	fps,
+	profileId = 1,
+	brand = 'hvc1',
+	preferHighTier = false,
 }: {
 	width: number;
 	height: number;
 	fps: number | null;
+	profileId?: 1 | 2;
+	brand?: 'hvc1' | 'hev1';
+	preferHighTier?: boolean;
 }) => {
-	const profile = hevcLevels.find((p) => {
+	const level = hevcLevels.find((p) => {
 		return p.maxResolutionsAndFrameRates.some((max) => {
 			if (width > max.width) {
 				return false;
@@ -25,20 +31,22 @@ export const chooseCorrectHevcProfile = ({
 		});
 	});
 
-	if (!profile) {
+	if (!level) {
 		throw new Error(
 			`No suitable HEVC profile found for ${width}x${height}@${fps}fps`,
 		);
 	}
 
+	const tier = preferHighTier && level.maxBitrateHighTier ? 'H' : 'L';
+
 	// HEVC codec string format: hev1.2.${level_hex} or hvc1.2.${level_hex}
 	// We'll use hvc1 as it's more widely supported
-	return `hvc1.${
+	return `${brand}.${
 		// Profile
 		// 1 = Main
 		// 2 = Main 10
 		// Chrome seems to support only Main
-		1
+		profileId
 	}.${
 		// Profile space
 		// Unclear which value to set, but 0 works
@@ -46,11 +54,10 @@ export const chooseCorrectHevcProfile = ({
 	}.${
 		// L = Main tier
 		// H = High tier
-		// TODO: Select high tier if resolution is big
-		'L'
+		tier
 	}${
 		// Level
-		Math.round(Number(profile.level) * 30)
+		Math.round(Number(level.level) * 30)
 	}.${
 		// Bit depth
 		'b0'

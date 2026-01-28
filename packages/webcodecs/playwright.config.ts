@@ -3,10 +3,10 @@ import {defineConfig, devices, Project} from '@playwright/test';
 export default defineConfig({
 	projects: [
 		{
-			name: 'chrome',
+			name: process.env.CI ? 'chromium' : 'chrome',
 			use: {
 				...devices['Desktop Chrome'],
-				channel: 'chrome', // Use Google Chrome instead of Chromium to get proprietary codecs
+				channel: process.env.CI ? undefined : 'chrome',
 			},
 		},
 		{

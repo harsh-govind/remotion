@@ -1,6 +1,6 @@
 import {isSafari} from './browser-quirks';
 import type {ConvertMediaVideoCodec} from './get-available-video-codecs';
-import {getCodecStringForEncoder} from './get-codec-string';
+import {getCodecStringsForEncoder} from './get-codec-string';
 
 export const getVideoEncoderConfig = async ({
 	codec,
@@ -17,31 +17,34 @@ export const getVideoEncoderConfig = async ({
 		return null;
 	}
 
-	const config: VideoEncoderConfig = {
-		codec: getCodecStringForEncoder({codec, fps, height, width}),
-		height,
-		width,
-		bitrate: isSafari() ? 3_000_000 : undefined,
-		bitrateMode: codec === 'vp9' && !isSafari() ? 'quantizer' : undefined,
-		framerate: fps ?? undefined,
-	};
+	const codecStrings = getCodecStringsForEncoder({codec, fps, height, width});
+	for (const codecString of codecStrings) {
+		const config: VideoEncoderConfig = {
+			codec: codecString,
+			height,
+			width,
+			bitrate: isSafari() ? 3_000_000 : undefined,
+			bitrateMode: codec === 'vp9' && !isSafari() ? 'quantizer' : undefined,
+			framerate: fps ?? undefined,
+		};
 
-	const hardware: VideoEncoderConfig = {
-		...config,
-		hardwareAcceleration: 'prefer-hardware',
-	};
+		const hardware: VideoEncoderConfig = {
+			...config,
+			hardwareAcceleration: 'prefer-hardware',
+		};
 
-	if ((await VideoEncoder.isConfigSupported(hardware)).supported) {
-		return hardware;
-	}
+		if ((await VideoEncoder.isConfigSupported(hardware)).supported) {
+			return hardware;
+		}
 
-	const software: VideoEncoderConfig = {
-		...config,
-		hardwareAcceleration: 'prefer-software',
-	};
+		const software: VideoEncoderConfig = {
+			...config,
+			hardwareAcceleration: 'prefer-software',
+		};
 
-	if ((await VideoEncoder.isConfigSupported(software)).supported) {
-		return software;
+		if ((await VideoEncoder.isConfigSupported(software)).supported) {
+			return software;
+		}
 	}
 
 	return null;
